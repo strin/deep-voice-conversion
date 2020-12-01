@@ -42,7 +42,9 @@ class Net1(ModelDesc):
             tf.reshape(self.y_ppgs, shape=(tf.size(self.y_ppgs),), name='net1/eval/y_ppg_1d')
             tf.reshape(self.preds, shape=(tf.size(self.preds),), name='net1/eval/pred_ppg_1d')
 
-    def _get_optimizer(self):
+        return self.cost
+
+    def optimizer(self):
         lr = tf.get_variable('learning_rate', initializer=hp.train1.lr, trainable=False)
         return tf.train.AdamOptimizer(lr)
 
@@ -114,7 +116,9 @@ class Net2(ModelDesc):
         if not is_training:
             tf.summary.scalar('net2/eval/summ_loss', self.cost)
 
-    def _get_optimizer(self):
+        return self.cost
+
+    def optimizer(self):
         gradprocs = [
             tensorpack_extension.FilterGradientVariables('.*net2.*', verbose=False),
             gradproc.MapGradient(
