@@ -2,7 +2,7 @@
 # !/usr/bin/env python
 
 import tensorflow as tf
-from tensorpack.graph_builder.model_desc import ModelDesc, InputDesc
+from tensorpack.graph_builder.model_desc import ModelDesc
 from tensorpack.tfutils import (
     get_current_tower_context, optimizer, gradproc)
 from tensorpack.tfutils.scope_utils import auto_reuse_variable_scope
@@ -17,11 +17,11 @@ class Net1(ModelDesc):
     def __init__(self):
         pass
 
-    def _get_inputs(self):
-        return [InputDesc(tf.float32, (None, None, hp.default.n_mfcc), 'x_mfccs'),
-                InputDesc(tf.int32, (None, None,), 'y_ppgs')]
+    def inputs(self):
+        return [tf.TensorSpec((None, None, hp.default.n_mfcc), tf.float32, 'x_mfccs'),
+                tf.TensorSpec((None, None,), tf.int32, 'y_ppgs')]
 
-    def _build_graph(self, inputs):
+    def build_graph(self, *inputs):
         self.x_mfccs, self.y_ppgs = inputs
         is_training = get_current_tower_context().is_training
         with tf.variable_scope('net1'):
@@ -83,14 +83,14 @@ class Net1(ModelDesc):
 
 class Net2(ModelDesc):
 
-    def _get_inputs(self):
+    def inputs(self):
         n_timesteps = (hp.default.duration * hp.default.sr) // hp.default.hop_length + 1
 
-        return [InputDesc(tf.float32, (None, n_timesteps, hp.default.n_mfcc), 'x_mfccs'),
-                InputDesc(tf.float32, (None, n_timesteps, hp.default.n_fft // 2 + 1), 'y_spec'),
-                InputDesc(tf.float32, (None, n_timesteps, hp.default.n_mels), 'y_mel'), ]
+        return [tf.TensorSpec((None, n_timesteps, hp.default.n_mfcc), tf.float32, 'x_mfccs'),
+                tf.TensorSpec((None, n_timesteps, hp.default.n_fft // 2 + 1), tf.float32, 'y_spec'),
+                tf.TensorSpec((None, n_timesteps, hp.default.n_mels), tf.float32, 'y_mel'), ]
 
-    def _build_graph(self, inputs):
+    def build_graph(self, *inputs):
         self.x_mfcc, self.y_spec, self.y_mel = inputs
 
         is_training = get_current_tower_context().is_training

@@ -145,12 +145,16 @@ def _get_mfcc_and_spec(wav, preemphasis_coeff, n_fft, win_length, hop_length):
     mag = np.abs(D)
 
     # Get mel-spectrogram
+    # Must have librosa==0.6.3
+    # https://github.com/librosa/librosa/issues/1160
+    # https://blog.csdn.net/Drifter_Galaxy/article/details/105077454
     mel_basis = librosa.filters.mel(hp.default.sr, hp.default.n_fft, hp.default.n_mels)  # (n_mels, 1+n_fft//2)
     mel = np.dot(mel_basis, mag)  # (n_mels, t) # mel spectrogram
 
     # Get mfccs, amp to db
     mag_db = amp2db(mag)
     mel_db = amp2db(mel)
+    
     mfccs = np.dot(librosa.filters.dct(hp.default.n_mfcc, mel_db.shape[0]), mel_db)
 
     # Normalization (0 ~ 1)
